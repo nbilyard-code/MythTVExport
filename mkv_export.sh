@@ -17,6 +17,7 @@
 # You will need to install handbrake-cli inorder to use.  (e.g. sudo apt install handbrake-cli)
 #
 #
+#
 # Set the directory to export the files to, and the mythtv recording directory
 EXPORT_DIR="/media/server/Mythtranscode"
 RECORD_DIR="/var/lib/mythtv/recordings"
