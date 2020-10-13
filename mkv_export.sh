@@ -42,7 +42,7 @@ for file in *.mpg *.ts
 		echo "$test exists, skipping transcode."
 	else
 	# Below you can edit the transcode options in Handbrake.  There are alot of options, so please check handbrake's documentation.
-	/usr/bin/HandBrakeCLI -i $file -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
+	/usr/bin/HandBrakeCLI -i $file -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=4
 	fi
 done
 
