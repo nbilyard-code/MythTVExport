@@ -37,7 +37,7 @@ for file in *.mpg *.ts
 	episode=$(mysql -u $user -h $host -D $db -se "SELECT episode FROM recorded WHERE basename='$file'")
 	name=$title-$subtitle-$season-$episode
 	ext='mkv'
-	test=$name.$ext
+	test=$EXPORT_DIR/$name.$ext
 	if [ -f "$test" ]; then
 		echo "$test exists, skipping transcode."
 	else
