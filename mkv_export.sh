@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # This bash script is for exporting all your mythtv recording as h264 mkv files to a new directory,
-# and renaming the new encoded files in a human readable format.  This scaript has been tested on mythtv v31.
+# and renaming the new encoded files in a human readable format.  This script has been tested on mythtv v31.
 #
 # The script will query the mythtv database, and pull out the name of the show, the show title, season, and episode
 # number.  It will use the file name to run a mysql SELECT query on the mythconverg database recorded table. The script
@@ -41,6 +41,7 @@ for file in *.mpg *.ts
 	if [ -f "$test" ]; then
 		echo "$test exists, skipping transcode."
 	else
+	# Below you can edit the transcode options in Handbrake.  There are alot of options, so please check handbrake's documentation.
 	/usr/bin/HandBrakeCLI -i $file -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
 	fi
 done
