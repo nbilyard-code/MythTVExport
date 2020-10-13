@@ -16,6 +16,10 @@
 # To use this script, you can call it directly or run it as a cron job.  It takes no arguments from the command line.
 # You will need to install handbrake-cli inorder to use.  (e.g. sudo apt install handbrake-cli)
 #
+# This scripts is not yet done.  I am still working on the ability to grab a cutlist, auto reencode without the
+# found commercials, then encode with handbrake.
+#
+#   ###  The main Script ###
 #
 # Set the directory to export the files to, and the mythtv recording directory
 EXPORT_DIR="/media/server/Mythtranscode"
@@ -43,7 +47,7 @@ for file in *.mpg *.ts
 	if [ -f "$test" ]; then
 		echo "$test exists, skipping transcode."
 	else
-	# Below you can edit the transcode options in Handbrake.  There are alot of options, so please check handbrake's documentation.
+	# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
 	/usr/bin/HandBrakeCLI -i $file -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
 	fi
 done
