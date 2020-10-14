@@ -70,7 +70,7 @@ for file in *.mpg *.ts
 	# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
 	/usr/bin/HandBrakeCLI -i "$TEMP_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
 	
-	# Finally, we delete our temporary working folders.
+	# Finally, we delete our temporary working files.
 	rm "$TEMP_DIR"/"$file"
 	rm "$TEMP_DIR"/"$file".map
 	fi
