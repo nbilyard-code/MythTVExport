@@ -44,7 +44,7 @@ for file in *.mpg *.ts
 	name=$title-$subtitle-$season-$episode
 	ext='mkv'
 	#check if name exists in the destination directory.  If yes, skip transcode.  If not, start Handbrake.
-	test=$name.$ext
+	test=$EXPORT_DIR/$name.$ext
 	if [ -f "$test" ]; then
 		echo "$test exists, skipping transcode."
 	else
