@@ -21,9 +21,10 @@
 #
 #   ###  The main Script ###
 #
-# Set the directory to export the files to, and the mythtv recording directory
+# Set the directory to export the files to, and the mythtv recording directory, plus a temp directory.
 EXPORT_DIR="/media/server/Mythtranscode"
 RECORD_DIR="/var/lib/mythtv/recordings"
+TEMP_DIR="/media/server/tmp"
 # Set MYSQL information
 # You can find the database info in your /etc/mythtv/config.xml file.  Put the password into the
 # export MYSQL_PWD variable.  This keeps mysql from complaining about passwords in the clear.
@@ -47,8 +48,15 @@ for file in *.mpg *.ts
 	if [ -f "$test" ]; then
 		echo "$test exists, skipping transcode."
 	else
+	/user/bin/mythcommflag --method=7 -f $file
+	chanid =${$file:0:4}
+	time=${$file:5:14}
+	/usr/bin/mythutil --chanid "$chanid" --starttime "$time" --gencutlist
+	/usr/bin/mythutil --chanid "$chanid" --starttime "$time" --getcutlist
+	/usr/bin/mythtranscode --chanid="$chanid" --starttime "$time" --mpeg2 --honorcutlist -o "$TEMP_DIR"/"$file"
 	# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
-	/usr/bin/HandBrakeCLI -i $file -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
+	/usr/bin/HandBrakeCLI -i "$TEMP_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
+	rm "$TEMP_DIR"/"$file"
 	fi
 done
 
