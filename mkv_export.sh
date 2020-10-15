@@ -27,6 +27,12 @@ EXPORT_DIR="/media/server/Mythtranscode"
 RECORD_DIR="/var/lib/mythtv/recordings"
 TEMP_DIR="/media/server/tmp"
 
+#    # Run as a cron job #
+# If you want to run this script as a cron job, and only want it to run a set number of transcodes before it exits,
+# please set the maximum number of transcode jobs to do before exiting as an argument in the cron job.
+maxjob=$1
+
+
 # Set MYSQL information
 # You can find the database info in your /etc/mythtv/config.xml file.  Put the password into the
 # export MYSQL_PWD variable.  This keeps mysql from complaining about passwords in the clear.
@@ -35,8 +41,11 @@ user='mythtv'
 host='localhost'
 db='mythconverg'
 
-#  SCRIPT #
+#  SCRIPT #b
 cd $RECORD_DIR
+# Count files in recoreded directory for max loops
+count=$("ls -l | wc -l")
+
 for file in *.mpg *.ts
 	do
 	# Get Database info on the file
