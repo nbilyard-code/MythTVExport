@@ -43,8 +43,6 @@ db='mythconverg'
 
 #  SCRIPT #b
 cd $RECORD_DIR
-# Count files in recoreded directory for max loops
-count=$("ls -l | wc -l")
 
 for file in *.mpg *.ts
 	do
