@@ -30,7 +30,7 @@ TEMP_DIR="/media/server/tmp"
 #    # Run as a cron job #
 # If you want to run this script as a cron job, and only want it to run a set number of transcodes before it exits,
 # please set the maximum number of transcode jobs to do before exiting as an argument in the cron job.
-maxjob=$1
+# This functionality is not yet impletmented.
 
 
 # Set MYSQL information
@@ -41,7 +41,7 @@ user='mythtv'
 host='localhost'
 db='mythconverg'
 
-#  SCRIPT #b
+#  SCRIPT ############
 cd $RECORD_DIR
 
 for file in *.mpg *.ts
