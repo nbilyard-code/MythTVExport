@@ -18,6 +18,8 @@
 # To use this script, you call it directly.  It takes no arguments from the command line.
 # You will need to install handbrake-cli inorder to use.  (e.g. sudo apt install handbrake-cli)
 #
+# REQUIREMENTS
+# handbrake-cli
 #
 #   ###  Setting system variables ###
 #
