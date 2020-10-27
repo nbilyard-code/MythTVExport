@@ -71,33 +71,54 @@ for file in *.mpg *.ts
 	test=$EXPORT_DIR/$name.$ext
 	if [ -f "$test" ]; then
 		echo "$test exists, skipping transcode."
+		
 	# Attempt to Fix a video that wont encode.	
 	elif [[ ! -f "$test" && "fix" == "fix-broken" ]]; then
 		ffmpeg -i "$file" -acodec copy -vcodec copy "$file"-new
 		rm "$file"
 		mv "file"-new "$file"
 		mythtranscode --mpeg2 --buildindex --allkeys --showprogress --infile "$file"
+		
+		# Retry the main mkv export again
+		/usr/bin/mythcommflag --method=7 -f $file
 	
+		# Next, we pull out the chanid and starttime from the default filename for mythutil to generate a commercial cutlist.
+		chid=$(echo $file | cut -c1-4)
+		stime=$(echo $file | cut -c6-19)
+		/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --gencutlist
+		/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --getcutlist
+	
+		# Next, we transcode lossless with mythtranscode, cutting out the commercials.  The new video file and map are saved to the temp folder.
+		/usr/bin/mythtranscode --chanid="$chid" --starttime "$stime" --mpeg2 --honorcutlist -o "$TEMP_DIR"/"$file"
+	
+		# Now we are ready to transcode to h264 with handbrake. 
+		# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
+		/usr/bin/HandBrakeCLI -i "$TEMP_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
+	
+		# Finally, we delete our temporary working files.
+		rm "$TEMP_DIR"/"$file"
+		rm "$TEMP_DIR"/"$file".map
+		fi
 	else
-	# First we will run a new commercial detect on the video file
-	/usr/bin/mythcommflag --method=7 -f $file
+		# First we will run a new commercial detect on the video file
+		/usr/bin/mythcommflag --method=7 -f $file
 	
-	# Next, we pull out the chanid and starttime from the default filename for mythutil to generate a commercial cutlist.
-	chid=$(echo $file | cut -c1-4)
-	stime=$(echo $file | cut -c6-19)
-	/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --gencutlist
-	/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --getcutlist
+		# Next, we pull out the chanid and starttime from the default filename for mythutil to generate a commercial cutlist.
+		chid=$(echo $file | cut -c1-4)
+		stime=$(echo $file | cut -c6-19)
+		/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --gencutlist
+		/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --getcutlist
 	
-	# Next, we transcode lossless with mythtranscode, cutting out the commercials.  The new video file and map are saved to the temp folder.
-	/usr/bin/mythtranscode --chanid="$chid" --starttime "$stime" --mpeg2 --honorcutlist -o "$TEMP_DIR"/"$file"
+		# Next, we transcode lossless with mythtranscode, cutting out the commercials.  The new video file and map are saved to the temp folder.
+		/usr/bin/mythtranscode --chanid="$chid" --starttime "$stime" --mpeg2 --honorcutlist -o "$TEMP_DIR"/"$file"
 	
-	# Now we are ready to transcode to h264 with handbrake. 
-	# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
-	/usr/bin/HandBrakeCLI -i "$TEMP_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
+		# Now we are ready to transcode to h264 with handbrake. 
+		# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
+		/usr/bin/HandBrakeCLI -i "$TEMP_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
 	
-	# Finally, we delete our temporary working files.
-	rm "$TEMP_DIR"/"$file"
-	rm "$TEMP_DIR"/"$file".map
-	fi
+		# Finally, we delete our temporary working files.
+		rm "$TEMP_DIR"/"$file"
+		rm "$TEMP_DIR"/"$file".map
+		fi
 done
 
