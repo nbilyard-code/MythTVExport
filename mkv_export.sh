@@ -15,11 +15,12 @@
 # You can change the number of threads to use by editing the threads statement in the Handbrake command.  It is currently
 # set to use 5 threads.
 #
-# To use this script, you call it directly.  It takes no arguments from the command line.
+# To use this script, you call it directly. (e.g. sh mkv_export.sh)
 # You will need to install handbrake-cli inorder to use.  (e.g. sudo apt install handbrake-cli)
 #
 # REQUIREMENTS
 # handbrake-cli
+# ffmpeg
 #
 #   ###  Setting system variables ###
 #
@@ -29,11 +30,16 @@ EXPORT_DIR="/media/server/Mythtranscode"
 RECORD_DIR="/var/lib/mythtv/recordings"
 TEMP_DIR="/media/server/tmp"
 
-#    # Run as a cron job #
-# If you want to run this script as a cron job, and only want it to run a set number of transcodes before it exits,
-# please set the maximum number of transcode jobs to do before exiting as an argument in the cron job.
-# This functionality is not yet impletmented.
-
+#    # Attempting to Fix files that fail #  UNDER CONSTRUCTION
+# Somtimes the mythtranscode will fail, and will not output a file to the tmp folder for handbrake to encode.
+# When this happens, the script will continue to the next file, but you will still lose the processor time,
+# as the error won't showup until after the commercial flag.
+# Once you have run the script on all your files, you can then try to go back and retry the files that did not encode
+# To do this add "fix-broken" agrugment to the call of the script.  (e.g. sh mkv_export.sh fix-broken )
+# The script will loop through all the files again, and if there is no mkv file in the output directory
+# it will call ffmpeg to remux the original file, replace it, rebuild the index, then start the comflag process
+# again.
+# This WILL delete the original file, and replace it with a new copy.
 
 # Set MYSQL information
 # You can find the database info in your /etc/mythtv/config.xml file.  Put the password into the
@@ -42,6 +48,9 @@ export MYSQL_PWD=V3yZMrw9
 user='mythtv'
 host='localhost'
 db='mythconverg'
+
+# fix video variable
+fix=$1
 
 #  SCRIPT ############
 cd $RECORD_DIR
@@ -62,6 +71,13 @@ for file in *.mpg *.ts
 	test=$EXPORT_DIR/$name.$ext
 	if [ -f "$test" ]; then
 		echo "$test exists, skipping transcode."
+	# Attempt to Fix a video that wont encode.	
+	elif [[ ! -f "$test" && "fix" == "fix-broken" ]]; then
+		ffmpeg -i "$file" -acodec copy -vcodec copy "$file"-new
+		rm "$file"
+		mv "file"-new "$file"
+		mythtranscode --mpeg2 --buildindex --allkeys --showprogress --infile "$file"
+	
 	else
 	# First we will run a new commercial detect on the video file
 	/usr/bin/mythcommflag --method=7 -f $file
