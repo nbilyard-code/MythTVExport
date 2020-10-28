@@ -34,10 +34,10 @@ RECORD_DIR="/var/lib/mythtv/recordings"
 TEMP_DIR="/media/server/tmp"
 
 # Attempting to fix files that fail  
-Somtimes the mythtranscode will fail, and will not output a file to the tmp folder for handbrake to encode.
+Sometimes the mythtranscode will fail, and will not output a file to the tmp folder for handbrake to encode.
 When this happens, the script will continue to the next file, but you will still lose the processor time,
 as the error won't showup until after the commercial flag.  This error seems to occur more for .ts files in my case.
 Once you have run the script on all your files, you can then try to go back and retry the files that did not encode
-To do this add "encode-broken" agrugment to the call of the script.  (e.g. sh mkv_export.sh encode-broken )
+To do this add "encode-broken" argument to the call of the script.  (e.g. sh mkv_export.sh encode-broken )
 The script will loop through all the files again, and if there is no mkv file in the output directory
 it will try to run handbrake-cli on the original file with no commercial flagging or cutting.
