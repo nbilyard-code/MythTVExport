@@ -20,7 +20,9 @@
 #
 # REQUIREMENTS
 # handbrake-cli
-# ffmpeg
+# mythcommflag
+# mythtranscode
+# mythutils
 #
 #   ###  Setting system variables ###
 #
@@ -72,7 +74,7 @@ for file in *.mpg *.ts
 		echo "$test exists, skipping transcode."
 		
 	# Attempt to Fix a video that wont encode.	
-	elif [ ! -f "$test" ] && [ "fix" = 'encode-broken' ]; then
+	elif [ ! -f "$test" ] && [ "$fix" = 'encode-broken' ]; then
 		# Try to transcode original file to h264 with handbrake. 
 		# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
 		/usr/bin/HandBrakeCLI -i "$RECORD_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
