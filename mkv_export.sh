@@ -35,11 +35,10 @@ TEMP_DIR="/media/server/tmp"
 # When this happens, the script will continue to the next file, but you will still lose the processor time,
 # as the error won't showup until after the commercial flag.
 # Once you have run the script on all your files, you can then try to go back and retry the files that did not encode
-# To do this add "fix-broken" agrugment to the call of the script.  (e.g. sh mkv_export.sh fix-broken )
+# To do this add "encode-broken" agrugment to the call of the script.  (e.g. sh mkv_export.sh encode-broken )
 # The script will loop through all the files again, and if there is no mkv file in the output directory
-# it will call ffmpeg to remux the original file, replace it, rebuild the index, then start the comflag process
-# again.
-# This WILL delete the original file, and replace it with a new copy.
+# it will try to run handbrake-cli on the original file with no commercial flagging or cutting.
+
 
 # Set MYSQL information
 # You can find the database info in your /etc/mythtv/config.xml file.  Put the password into the
@@ -52,7 +51,7 @@ db='mythconverg'
 # fix video variable
 fix=$1
 
-#  SCRIPT ############
+##  SCRIPT ##
 cd $RECORD_DIR
 
 for file in *.mpg *.ts
@@ -73,32 +72,10 @@ for file in *.mpg *.ts
 		echo "$test exists, skipping transcode."
 		
 	# Attempt to Fix a video that wont encode.	
-	elif [[ ! -f "$test" && "fix" == "fix-broken" ]]; then
-		ffmpeg -i "$file" -acodec copy -vcodec copy "$file"-new
-		rm "$file"
-		mv "file"-new "$file"
-		mythtranscode --mpeg2 --buildindex --allkeys --showprogress --infile "$file"
-		
-		# Retry the main mkv export again
-		/usr/bin/mythcommflag --method=7 -f $file
-	
-		# Next, we pull out the chanid and starttime from the default filename for mythutil to generate a commercial cutlist.
-		chid=$(echo $file | cut -c1-4)
-		stime=$(echo $file | cut -c6-19)
-		/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --gencutlist
-		/usr/bin/mythutil --chanid "$chid" --starttime "$stime" --getcutlist
-	
-		# Next, we transcode lossless with mythtranscode, cutting out the commercials.  The new video file and map are saved to the temp folder.
-		/usr/bin/mythtranscode --chanid="$chid" --starttime "$stime" --mpeg2 --honorcutlist -o "$TEMP_DIR"/"$file"
-	
-		# Now we are ready to transcode to h264 with handbrake. 
+	elif [ ! -f "$test" ] && [ "fix" = 'encode-broken' ]; then
+		# Try to transcode original file to h264 with handbrake. 
 		# Below you can edit the transcode options for Handbrake.  There are alot of options, so please check handbrake's documentation.
-		/usr/bin/HandBrakeCLI -i "$TEMP_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
-	
-		# Finally, we delete our temporary working files.
-		rm "$TEMP_DIR"/"$file"
-		rm "$TEMP_DIR"/"$file".map
-		fi
+		/usr/bin/HandBrakeCLI -i "$RECORD_DIR"/"$file" -o "$EXPORT_DIR"/"$name"."$ext" -e x264 -q 20 -B 160 -x --comb-detect -d threads=5
 	else
 		# First we will run a new commercial detect on the video file
 		/usr/bin/mythcommflag --method=7 -f $file
@@ -121,4 +98,3 @@ for file in *.mpg *.ts
 		rm "$TEMP_DIR"/"$file".map
 		fi
 done
-
